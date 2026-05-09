@@ -1,24 +1,26 @@
 import express from "express";
 import z from "zod";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "./config";
+import { JWT_SECRET } from "@repo/backend-common/config";
 import { authMiddleware } from "./middlewares/authMiddleware";
+import { createUserSchema } from "@repo/common/zodSchema";
 
 const app = express();
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
     // res.send("signup endpoint")
-    const reqBody = z.object({
-        username: z.string().min(4).max(9),
-        password: z.string().min(6)
-    });
-    const parsedData = reqBody.safeParse(req.body);
+    const parsedData = createUserSchema.safeParse(req.body);
     if (parsedData.success) {
         const { username, password } = parsedData.data;
         const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
         res.json({
             token: token
+        })
+    }
+    else {
+        res.json({
+            message: "Incorrect inputs"
         })
     }
 })
