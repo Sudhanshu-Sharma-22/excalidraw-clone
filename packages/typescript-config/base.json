@@ -14,6 +14,12 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ES2022"
+    "target": "ES2022",
+    "baseUrl": ".",
+    "paths": {
+      "@repo/db/client": ["../../packages/db/src/schema.ts"],
+      "@repo/common/zodSchema": ["../../packages/common/src/zodSchema.ts"],
+      "@repo/backend-common/config": ["../../packages/backend-common/src/index.ts"]
+    }
   }
 }

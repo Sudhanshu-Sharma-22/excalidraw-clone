@@ -1,8 +1,8 @@
-import WebSocket from "ws";
-import jwt, { decode } from "jsonwebtoken";
+import { WebSocketServer } from "ws";
+import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocketServer({ port: 8080 });
 
 wss.on("connection", (socket, req) => {
     const url = req.url;
@@ -15,7 +15,7 @@ wss.on("connection", (socket, req) => {
         return;
     }
     try {
-        const decodedToken = jwt.verify(token, JWT_SECRET);
+        const decodedToken = jwt.verify(token, JWT_SECRET as string);
         if (!decodedToken) {
             socket.close();
             return;

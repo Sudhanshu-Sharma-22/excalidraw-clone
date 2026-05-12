@@ -9,10 +9,10 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
         return res.status(401).json({ message: "Unauthorized" });
     }
     try {
-        const decodedToken = jwt.verify(token, JWT_SECRET);
+        const decodedToken = jwt.verify(token, JWT_SECRET as string);
         if (decodedToken) {
             //@ts-ignore
-            req.id = decodedToken.id;
+            req.userId = decodedToken.userId;
             next();
         }
     } catch (err) {
