@@ -9,7 +9,6 @@ import * as bcrypt from "bcrypt";
 const app = express();
 app.use(express.json());
 
-
 app.post("/signup", async (req, res) => {
     // res.send("signup endpoint")
     console.log(req.body);
@@ -112,6 +111,23 @@ app.post("/create-room", authMiddleware, async (req, res) => {
     }
 
 
+})
+
+app.get("/chats/:roomId", async (req, res) => {
+    const roomId = Number(req.params.roomId);
+    const messages = await prismaClient.chat.findMany({
+        where: {
+            roomId: roomId
+        },
+        orderBy: {
+            id: "desc"
+        },
+        take: 50
+    })
+
+    res.json({
+        messages
+    })
 })
 
 app.listen(3004);
