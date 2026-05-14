@@ -88,4 +88,11 @@ wss.on("connection", (socket, req) => {
             })
         }
     });
+
+    socket.on("close", () => {
+        const index = users.findIndex(u => u.socket === socket);
+        if (index !== -1) {
+            users.splice(index, 1);
+        }
+    });
 });
