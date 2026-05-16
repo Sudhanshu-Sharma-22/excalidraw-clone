@@ -10,6 +10,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
     }
     try {
         const decodedToken = jwt.verify(token, JWT_SECRET as string);
+        // console.log(decodedToken.userId);
         if (decodedToken) {
             //@ts-ignore
             req.userId = decodedToken.userId;

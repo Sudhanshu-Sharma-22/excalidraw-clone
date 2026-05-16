@@ -5,9 +5,11 @@ import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { createUserSchema, signInSchema, createRoomSchema } from "@repo/common/zodSchema";
 import { prismaClient } from "@repo/db/client";
 import * as bcrypt from "bcrypt";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 app.post("/signup", async (req, res) => {
     // res.send("signup endpoint")
@@ -43,17 +45,18 @@ app.post("/signup", async (req, res) => {
 
 app.post("/signin", async (req, res) => {
     // res.send("signin endpoint")
-    const parsedData = signInSchema.safeParse(req.body);
-    if (!parsedData.success) {
-        res.json({
-            message: "Incorrect inputs"
-        })
-    }
+    // const parsedData = signInSchema.safeParse(req.body);
+    // if (!parsedData.success) {
+    //     res.json({
+    //         message: "Incorrect inputs"
+    //     })
+    //     return;
+    // }
 
     const user = await prismaClient.user.findFirst({
         where: {
-            email: parsedData.data?.username,
-            password: parsedData.data?.password
+            email: req.body.username,
+            password: req.body.password
         }
     })
 
@@ -77,10 +80,12 @@ app.post("/signin", async (req, res) => {
 app.post("/create-room", authMiddleware, async (req, res) => {
     //db call
     const parsedData = createRoomSchema.safeParse(req.body);
+    console.log(parsedData);
     if (!parsedData.success) {
         res.json({
             message: "Incorrect inputs"
         })
+        return;
     }
     // @ts-ignore
     const userId = req.userId;
