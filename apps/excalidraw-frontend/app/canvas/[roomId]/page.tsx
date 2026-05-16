@@ -10,11 +10,8 @@ export default function canvas() {
     useEffect(() => {
         if (canvasRef.current) {
             const canvas = canvasRef.current;
-            const ctx = canvas.getContext("2d");
-            if (!ctx) {
-                return;
-            }
-            initCanvas(ctx, canvas.width, canvas.height)
+
+            initCanvas(canvas)
         }
 
     }, [canvasRef])

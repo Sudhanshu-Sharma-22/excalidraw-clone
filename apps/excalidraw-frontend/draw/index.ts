@@ -1,5 +1,5 @@
 
-export function initCanvas(canvas) {
+export function initCanvas(canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext("2d");
     if (!ctx) {
         return;
