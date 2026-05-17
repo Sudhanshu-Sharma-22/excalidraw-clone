@@ -1,25 +1,19 @@
-"use client"
 
-import { initCanvas } from "@/draw";
-import { useEffect, useRef } from "react"
+import Canvas from "@/app/components/RoomCanvas";
+import axios from "axios";
 
-export default function canvas() {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-
-
-    useEffect(() => {
-        if (canvasRef.current) {
-            const canvas = canvasRef.current;
-
-            initCanvas(canvas)
-        }
-
-    }, [canvasRef])
-
+export default async function CanvasPage({ params }: {
+    params: Promise<{ roomId: string }>
+}) {
+    const { roomId } = await params;
+    const response = await axios.get(`http://localhost:3004/room/${roomId}`);
+    const room = response.data.room;
+    console.log(room)
 
     return (
         <div>
-            <canvas ref={canvasRef} width={800} height={600} />
+            <Canvas roomId={roomId} />
         </div>
     )
+
 }

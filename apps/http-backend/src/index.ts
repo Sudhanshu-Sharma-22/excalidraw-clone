@@ -6,6 +6,8 @@ import { createUserSchema, signInSchema, createRoomSchema } from "@repo/common/z
 import { prismaClient } from "@repo/db/client";
 import * as bcrypt from "bcrypt";
 import cors from "cors";
+import axios from "axios";
+import { HTTP_BACKEND } from "../config.js";
 
 const app = express();
 app.use(express.json());
@@ -119,10 +121,11 @@ app.post("/create-room", authMiddleware, async (req, res) => {
 })
 
 app.get("/chats/:roomId", async (req, res) => {
-    const roomId = Number(req.params.roomId);
+    // const roomId = Number(req.params.roomId);
+    const numRoomId = await axios.get(`${HTTP_BACKEND}/room/${req.params.roomId}`)
     const messages = await prismaClient.chat.findMany({
         where: {
-            roomId: roomId
+            roomId: numRoomId.data.room.id
         },
         orderBy: {
             id: "desc"

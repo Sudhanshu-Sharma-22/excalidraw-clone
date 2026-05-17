@@ -52,7 +52,13 @@ wss.on("connection", (socket, req) => {
     })
 
     socket.on("message", async (event) => {
-        const parsedMessage = JSON.parse(event.toString());
+        let parsedMessage;
+        if (typeof event !== "string") {
+            parsedMessage = JSON.parse(event.toString());
+        } else {
+            parsedMessage = JSON.parse(event);
+        }
+
         if (parsedMessage.type === "join_room") {
             const user = users.find(u => u.socket === socket);
             user?.rooms.push(parsedMessage.roomId);
@@ -72,7 +78,7 @@ wss.on("connection", (socket, req) => {
                 data: {
                     message: parsedMessage.message,
                     userId: userId,
-                    roomId: roomId
+                    roomId: Number(roomId)
                 }
             })
 
