@@ -5,7 +5,7 @@ import Canvas from "./Canvas";
 
 export default function RoomCanvas({ roomId }: { roomId: string }) {
 
-    const socket  = useSocket(roomId);
+    const socket = useSocket(roomId);
 
     if (!socket) {
         return <div>Connecting to server...</div>

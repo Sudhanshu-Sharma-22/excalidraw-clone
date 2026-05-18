@@ -21,13 +21,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/cors": "^2.8.19",
     "@types/jsonwebtoken": "^9.0.10",
-    "bcrypt": "^6.0.0",
-    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "jsonwebtoken": "^9.0.3",
     "zod": "^4.4.3"

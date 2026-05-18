@@ -7,6 +7,11 @@ type Shapes = {
     y: number;
     width: number;
     height: number;
+} | {
+    type: "circle";
+    x: number;
+    y: number;
+    radius: number;
 }
 
 function getCanvasPoint(canvas: HTMLCanvasElement, e: MouseEvent) {
