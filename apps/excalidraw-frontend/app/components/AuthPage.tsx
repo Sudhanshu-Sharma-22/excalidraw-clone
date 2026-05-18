@@ -28,7 +28,7 @@ export default function AuthPage({ isSignin }: { isSignin: boolean }) {
             alert(response.data.message);
             localStorage.setItem("token", response.data.token);
             myHeaders.set("Authorization", response.data.token);
-            router.push("/");
+            router.push("/canvas/room4");
         } else {
             const response = await axios.post("http://localhost:3004/signup", {
                 username,

@@ -8,7 +8,7 @@ export default async function CanvasPage({ params }: {
     const { roomId } = await params;
     const response = await axios.get(`http://localhost:3004/room/${roomId}`);
     const room = response.data.room;
-    console.log(room)
+    // console.log(room) working correctly
 
     return (
         <div>

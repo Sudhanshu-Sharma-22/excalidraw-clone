@@ -6,8 +6,6 @@ import { createUserSchema, signInSchema, createRoomSchema } from "@repo/common/z
 import { prismaClient } from "@repo/db/client";
 import * as bcrypt from "bcrypt";
 import cors from "cors";
-import axios from "axios";
-import { HTTP_BACKEND } from "../config.js";
 
 const app = express();
 app.use(express.json());
@@ -71,7 +69,8 @@ app.post("/signin", async (req, res) => {
 
     const token = jwt.sign({
         userId: user?.id
-    }, JWT_SECRET as string, { expiresIn: "1h" });
+        // }, JWT_SECRET as string, { expiresIn: "1h" });
+    }, JWT_SECRET as string);
     res.json({
         token: token
     });
@@ -121,21 +120,23 @@ app.post("/create-room", authMiddleware, async (req, res) => {
 })
 
 app.get("/chats/:roomId", async (req, res) => {
-    // const roomId = Number(req.params.roomId);
-    const numRoomId = await axios.get(`${HTTP_BACKEND}/room/${req.params.roomId}`)
-    const messages = await prismaClient.chat.findMany({
-        where: {
-            roomId: numRoomId.data.room.id
-        },
-        orderBy: {
-            id: "desc"
-        },
-        take: 50
-    })
+    const slug = req.params.roomId;
+    const room = await prismaClient.room.findFirst({
+        where: { slug },
+    });
 
-    res.json({
-        messages
-    })
+    if (!room) {
+        res.status(404).json({ messages: [] });
+        return;
+    }
+
+    const messages = await prismaClient.chat.findMany({
+        where: { roomId: room.id },
+        orderBy: { id: "desc" },
+        take: 50,
+    });
+
+    res.json({ messages });
 })
 
 app.get("/room/:slug", async (req, res) => {

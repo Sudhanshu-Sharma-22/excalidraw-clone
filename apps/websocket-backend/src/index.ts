@@ -13,6 +13,17 @@ interface User {
 
 const users: User[] = [];
 
+async function resolveRoomId(roomIdOrSlug: string | number): Promise<number | null> {
+    const asNumber = Number(roomIdOrSlug);
+    if (!Number.isNaN(asNumber) && String(roomIdOrSlug) === String(asNumber)) {
+        return asNumber;
+    }
+    const room = await prismaClient.room.findFirst({
+        where: { slug: String(roomIdOrSlug) },
+    });
+    return room?.id ?? null;
+}
+
 function checkUser(token: string): string | null {
     try {
         const decodedToken = jwt.verify(token, JWT_SECRET as string);
@@ -52,46 +63,55 @@ wss.on("connection", (socket, req) => {
     })
 
     socket.on("message", async (event) => {
-        let parsedMessage;
-        if (typeof event !== "string") {
-            parsedMessage = JSON.parse(event.toString());
-        } else {
-            parsedMessage = JSON.parse(event);
-        }
-
-        if (parsedMessage.type === "join_room") {
-            const user = users.find(u => u.socket === socket);
-            user?.rooms.push(parsedMessage.roomId);
-        }
-        else if (parsedMessage.type === "leave_room") {
-            const user = users.find(u => u.socket === socket);
-            if (!user) {
-                return;
+        try {
+            let parsedMessage;
+            if (typeof event !== "string") {
+                parsedMessage = JSON.parse(event.toString());
+            } else {
+                parsedMessage = JSON.parse(event);
             }
-            user.rooms = user?.rooms.filter(room => room !== parsedMessage.roomId);
-        }
-        else if (parsedMessage.type === "send_message") {
-            const roomId = parsedMessage.roomId;
 
-            // i can use bullmq for better latency but for now i am just starting the app first to see if its working or not
-            await prismaClient.chat.create({
-                data: {
-                    message: parsedMessage.message,
-                    userId: userId,
-                    roomId: Number(roomId)
+            if (parsedMessage.type === "join_room") {
+                const user = users.find(u => u.socket === socket);
+                user?.rooms.push(parsedMessage.roomId);
+            }
+            else if (parsedMessage.type === "leave_room") {
+                const user = users.find(u => u.socket === socket);
+                if (!user) {
+                    return;
                 }
-            })
+                user.rooms = user?.rooms.filter(room => room !== parsedMessage.roomId);
+            }
+            else if (parsedMessage.type === "send_message") {
+                const roomIdOrSlug = parsedMessage.roomId;
+                const numericRoomId = await resolveRoomId(roomIdOrSlug);
 
-            users.forEach(user => {
-                if (user.rooms.includes(roomId)) {
-                    user.socket.send(JSON.stringify({
-                        type: "send_message",
+                if (numericRoomId === null) {
+                    console.error(`Room not found: ${roomIdOrSlug}`);
+                    return;
+                }
+
+                await prismaClient.chat.create({
+                    data: {
                         message: parsedMessage.message,
-                        roomId: roomId,
-                        userId: userId
-                    }))
-                }
-            })
+                        userId: userId,
+                        roomId: numericRoomId,
+                    },
+                });
+
+                users.forEach(user => {
+                    if (user.rooms.includes(roomIdOrSlug)) {
+                        user.socket.send(JSON.stringify({
+                            type: "send_message",
+                            message: parsedMessage.message,
+                            roomId: roomIdOrSlug,
+                            userId: userId,
+                        }));
+                    }
+                });
+            }
+        } catch (err) {
+            console.error("WebSocket message handler error:", err);
         }
     });
 

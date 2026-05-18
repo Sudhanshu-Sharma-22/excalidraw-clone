@@ -13,7 +13,7 @@ export default function Canvas({ roomId, socket }: { roomId: string, socket: Web
             initCanvas(canvas, roomId, socket!)
         }
 
-    }, [canvasRef]);
+    }, [roomId, socket]);
 
     return (
         <div>
