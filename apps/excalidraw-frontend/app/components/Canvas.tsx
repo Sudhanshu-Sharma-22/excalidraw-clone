@@ -2,25 +2,30 @@ import { initCanvas } from "@/draw";
 import { useWindowDimensions } from "@/app/hooks/useWindowDimensions";
 import { useEffect, useRef, useState } from "react";
 import { IconsButton } from "./IconsButton";
+import { Game } from "@/draw/game";
 
 
-type iconShapes = "circle" | "rect" | "line" | "eraser" | "pointer"
+export type iconShapes = "circle" | "rect" | "line" | "eraser" | "pointer"
 
 export default function Canvas({ roomId, socket }: { roomId: string, socket: WebSocket }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { width, height } = useWindowDimensions();
     const [iconSelected, setIconSelected] = useState<iconShapes>("rect");
+    const [game, setGame] = useState<Game>();
 
     useEffect(() => {
-        // @ts-ignore
-        window.iconSelected = iconSelected;
-    }, [iconSelected])
+        game?.setIconSelected(iconSelected);
+    }, [iconSelected, game])
 
     useEffect(() => {
         if (canvasRef.current) {
             const canvas = canvasRef.current;
+            const g = new Game(canvas, roomId, socket);
+            setGame(g);
 
-            initCanvas(canvas, roomId, socket!)
+            return () => {
+                g.destroy();
+            }
         }
 
     }, [roomId, socket]);
@@ -43,6 +48,7 @@ function IconBar({ iconSelected, setIconSelected }: {
         }} color="bg-blue-500" activated={iconSelected === "rect"}></IconsButton>
         <IconsButton icon="Circle" onClick={() => {
             setIconSelected("circle");
+            // alert("icon is now circle")
         }} color="bg-green-500" activated={iconSelected === "circle"}></IconsButton>
         <IconsButton icon="Line" onClick={() => {
             setIconSelected("line")
