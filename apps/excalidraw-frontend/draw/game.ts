@@ -11,7 +11,7 @@ export class Game {
     private clicked: boolean;
     private startX = 0;
     private startY = 0;
-    private iconSelected = "rect";
+    private iconSelected = "";
 
 
     constructor(canvas: HTMLCanvasElement, roomId: string, socket: WebSocket) {
@@ -62,6 +62,12 @@ export class Game {
                 this.ctx.arc(shape.centerX, shape.centerY, Math.abs(shape.radius), 0, Math.PI * 2);
                 this.ctx.stroke();
             }
+            else if (shape.type === "line") {
+                this.ctx.beginPath();
+                this.ctx.moveTo(shape.startX, shape.startY);
+                this.ctx.lineTo(shape.endX, shape.endY);
+                this.ctx.stroke();
+            }
         }
     }
 
@@ -98,6 +104,15 @@ export class Game {
                 radius: Math.max(Math.abs(width), Math.abs(height)) / 2
             }
         }
+        else if (iconSelected === "line") {
+            shape = {
+                type: "line",
+                startX: this.startX,
+                startY: this.startY,
+                endX: point.x,
+                endY: point.y
+            }
+        }
         if (!shape) return;
         this.existingShapes.push(shape);
 
@@ -108,7 +123,8 @@ export class Game {
             message: JSON.stringify({ shape }),
             roomId: this.roomId
         }))
-
+        alert("shape sent");
+        console.log(shape);
     }
 
     mouseMoveHandler = (e: MouseEvent) => {
@@ -131,6 +147,12 @@ export class Game {
                 this.ctx.arc(centerX, centerY, Math.abs(radius), 0, Math.PI * 2);
                 this.ctx.stroke();
                 this.ctx.closePath();
+            }
+            else if (iconSelected === "line") {
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.startX, this.startY);
+                this.ctx.lineTo(point.x, point.y);
+                this.ctx.stroke();
             }
         }
     }

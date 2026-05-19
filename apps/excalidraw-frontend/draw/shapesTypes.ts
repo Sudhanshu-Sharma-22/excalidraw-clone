@@ -10,4 +10,10 @@ export type Shapes = {
     centerX: number;
     centerY: number;
     radius: number;
+} | {
+    type: "line";
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
 }

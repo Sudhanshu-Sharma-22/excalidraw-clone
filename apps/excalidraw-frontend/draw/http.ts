@@ -28,6 +28,9 @@ export function parseShapeFromMessage(message: string): Shapes | null {
         else if (shape?.type === "circle") {
             return shape;
         }
+        else if (shape?.type === "line") {
+            return shape;
+        }
     } catch {
         return null;
     }
