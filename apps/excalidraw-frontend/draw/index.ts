@@ -9,8 +9,8 @@ type Shapes = {
     height: number;
 } | {
     type: "circle";
-    x: number;
-    y: number;
+    centerX: number;
+    centerY: number;
     radius: number;
 }
 
@@ -27,6 +27,9 @@ function parseShapeFromMessage(message: string): Shapes | null {
         const parsed = JSON.parse(message);
         const shape = parsed.shape;
         if (shape?.type === "rect") {
+            return shape;
+        }
+        else if (shape?.type === "circle") {
             return shape;
         }
     } catch {
@@ -72,15 +75,29 @@ export async function initCanvas(canvas: HTMLCanvasElement, roomId: string, sock
         const point = getCanvasPoint(canvas, e);
         const width = point.x - startX;
         const height = point.y - startY;
-        const shape: Shapes = {
-            type: "rect",
-            x: startX,
-            y: startY,
-            width: width,
-            height: height
+        //@ts-ignore
+        const iconSelected = window.iconSelected;
+        let shape: Shapes | null = null;
+        if (iconSelected === "rect") {
+            shape = {
+                type: "rect",
+                x: startX,
+                y: startY,
+                width: width,
+                height: height
+            }
         }
-
+        else if (iconSelected === "circle") {
+            shape = {
+                type: "circle",
+                centerX: startX + width / 2,
+                centerY: startY + height / 2,
+                radius: Math.max(Math.abs(width), Math.abs(height)) / 2
+            }
+        }
+        if (!shape) return;
         existingShapes.push(shape);
+
         renderShapes(existingShapes, ctx, canvas);
 
         socket.send(JSON.stringify({
@@ -98,7 +115,19 @@ export async function initCanvas(canvas: HTMLCanvasElement, roomId: string, sock
             const height = point.y - startY;
             renderShapes(existingShapes, ctx, canvas);
             ctx.strokeStyle = "#3b82f6";
-            ctx.strokeRect(startX, startY, width, height);
+            //@ts-ignore
+            const iconSelected = window.iconSelected;
+            if (iconSelected === "rect") {
+                ctx.strokeRect(startX, startY, width, height);
+            }
+            else if (iconSelected === "circle") {
+                ctx.beginPath();
+                const centerX = startX + width / 2;
+                const centerY = startY + height / 2;
+                const radius = Math.max(Math.abs(width), Math.abs(height)) / 2;
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
         }
     })
 }
@@ -112,6 +141,11 @@ function renderShapes(existingShapes: Shapes[], ctx: CanvasRenderingContext2D, c
     for (const shape of existingShapes) {
         if (shape.type === "rect") {
             ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
+        }
+        else if (shape.type === "circle") {
+            ctx.beginPath();
+            ctx.arc(shape.centerX, shape.centerY, shape.radius, 0, Math.PI * 2);
+            ctx.stroke();
         }
     }
 }

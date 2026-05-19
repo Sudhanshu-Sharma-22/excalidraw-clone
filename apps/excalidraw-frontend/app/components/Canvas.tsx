@@ -12,6 +12,11 @@ export default function Canvas({ roomId, socket }: { roomId: string, socket: Web
     const [iconSelected, setIconSelected] = useState<iconShapes>("rect");
 
     useEffect(() => {
+        // @ts-ignore
+        window.iconSelected = iconSelected;
+    }, [iconSelected])
+
+    useEffect(() => {
         if (canvasRef.current) {
             const canvas = canvasRef.current;
 
